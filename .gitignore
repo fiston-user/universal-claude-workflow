@@ -89,3 +89,7 @@ ucw-backup-*/
 # Local configuration
 .claude/settings.local.json
 .mcp.local.json
+
+# Example directories (for analysis only, not part of UCW)
+.agent-os/
+.claude/
