@@ -1,0 +1,65 @@
+{
+  "name": "nexus-claude-workflow",
+  "version": "2.0.0",
+  "description": "Self-evolving Claude Code workflow with persistent memory, agent orchestration, and adaptive learning",
+  "main": "src/index.js",
+  "bin": {
+    "ucw": "./bin/cli.js",
+    "nexus-claude": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest",
+    "lint": "eslint src/ --ext .js,.json",
+    "format": "prettier --write src/**/*.js",
+    "build": "npm run lint && npm test",
+    "prepublishOnly": "npm run build",
+    "setup-memory": "node src/setup/memory-setup.js",
+    "health": "node src/health/system-health.js"
+  },
+  "keywords": [
+    "claude-code",
+    "ai",
+    "workflow", 
+    "self-learning",
+    "agent-orchestration",
+    "mcp",
+    "memory",
+    "adaptive",
+    "nexus"
+  ],
+  "author": "NEXUS Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nexus-claude/nexus-workflow.git"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.5",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.10",
+    "semver": "^7.5.4",
+    "yaml": "^2.3.4",
+    "sqlite3": "^5.1.7",
+    "natural": "^6.12.0",
+    "axios": "^1.6.0",
+    "uuid": "^9.0.1",
+    "date-fns": "^2.30.0",
+    "lodash": "^4.17.21",
+    "ml-distance": "^4.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "@jest/globals": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "preferGlobal": true
+}

@@ -1,0 +1,55 @@
+# Source files not needed in package
+tests/
+coverage/
+.nyc_output/
+
+# Development files
+.eslintrc.js
+.prettierrc
+jest.config.js
+.github/
+.vscode/
+.idea/
+
+# Documentation (keep README.md)
+docs/
+examples/
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+
+# Git and CI
+.git/
+.gitignore
+.github/
+
+# Development dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+*.tgz
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Runtime files
+.env*
+.cache/
+.tmp/
+temp/
+tmp/
+
+# Analytics and logs
+.ucw-analytics.log
+.ucw-session.json
+.ucw-update-history.json
+ucw-health-report.md
+ucw-backup-*/
