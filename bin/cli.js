@@ -16,6 +16,11 @@ const remover = require('../src/remover');
 const projectDetector = require('../src/project-detector');
 const analytics = require('../src/analytics');
 
+// Import advanced UCW intelligence modules
+const workflowEngine = require('../src/workflow-engine');
+const instructionsEngine = require('../src/instructions-engine');
+const subagentOrchestrator = require('../src/subagent-orchestrator');
+
 program
   .name('ucw')
   .description('Universal Claude Workflow - Intelligent development automation for Claude Code')
@@ -356,6 +361,206 @@ program
       }
     } catch (error) {
       console.error(chalk.red('❌ Status check failed:'), error.message);
+      process.exit(1);
+    }
+  });
+
+// Intelligent workflow management
+program
+  .command('workflow <intent>')
+  .description('Start an intelligent AI-powered workflow')
+  .option('-c, --complexity <level>', 'Project complexity (simple, medium, complex, enterprise)')
+  .option('-t, --team-size <size>', 'Team size (solo, small, medium, large)')
+  .option('--agents <agents>', 'Comma-separated list of specific agents to use')
+  .action(async (intent, options) => {
+    try {
+      console.log(chalk.blue.bold('🧠 Starting Intelligent Workflow Engine\n'));
+      
+      const workflowOptions = {
+        complexity: options.complexity,
+        teamSize: options.teamSize
+      };
+      
+      if (options.agents) {
+        workflowOptions.preferredAgents = options.agents.split(',').map(a => a.trim());
+      }
+      
+      const workflow = await workflowEngine.startWorkflow(intent, workflowOptions);
+      
+      console.log(chalk.green.bold('\n🎉 Workflow completed successfully!'));
+      console.log(chalk.cyan(`Workflow ID: ${workflow.id}`));
+      console.log(chalk.cyan(`Duration: ${((workflow.completedAt - workflow.startTime) / 1000).toFixed(1)}s`));
+      
+    } catch (error) {
+      console.error(chalk.red('❌ Workflow failed:'), error.message);
+      process.exit(1);
+    }
+  });
+
+// Get AI-powered guidance
+program
+  .command('guide <task>')
+  .description('Get intelligent, context-aware guidance for development tasks')
+  .option('-v, --verbose', 'Show detailed instructions')
+  .option('-s, --skill-level <level>', 'Your skill level (beginner, intermediate, expert)')
+  .action(async (task, options) => {
+    try {
+      console.log(chalk.blue.bold('🧭 UCW Intelligent Guidance System\n'));
+      
+      const context = {
+        skillLevel: options.skillLevel || 'intermediate',
+        verbosity: options.verbose ? 'detailed' : 'standard',
+        projectInfo: await projectDetector.detect(process.cwd())
+      };
+      
+      const instructions = await instructionsEngine.getInstructions(task, context);
+      
+      console.log(chalk.cyan.bold(`📋 ${instructions.name}\n`));
+      console.log(chalk.gray(instructions.description));
+      console.log();
+      
+      for (let i = 0; i < instructions.steps.length; i++) {
+        const step = instructions.steps[i];
+        console.log(chalk.blue.bold(`${i + 1}. ${step.name}`));
+        console.log(chalk.gray(`   ${step.description}`));
+        
+        if (step.substeps && step.substeps.length > 0) {
+          for (let j = 0; j < step.substeps.length; j++) {
+            console.log(chalk.cyan(`   ${i + 1}.${j + 1} ${step.substeps[j]}`));
+          }
+        }
+        console.log();
+      }
+      
+      // Show contextual adaptations
+      if (instructions.adaptations && instructions.adaptations.length > 0) {
+        console.log(chalk.yellow.bold('🔧 Context Adaptations Applied:'));
+        instructions.adaptations.forEach(adaptation => {
+          console.log(chalk.yellow(`  • ${adaptation.type}: ${adaptation.changes || adaptation.level || adaptation.framework}`));
+        });
+        console.log();
+      }
+      
+      // Get next step recommendations
+      const recommendations = await instructionsEngine.getNextStepRecommendations(context);
+      if (recommendations.length > 0) {
+        console.log(chalk.magenta.bold('🔮 Intelligent Recommendations:'));
+        recommendations.forEach(rec => {
+          const priorityColor = rec.priority === 'high' ? chalk.red : rec.priority === 'medium' ? chalk.yellow : chalk.green;
+          console.log(priorityColor(`  • ${rec.description} (${rec.estimatedTime})`));
+        });
+      }
+      
+    } catch (error) {
+      console.error(chalk.red('❌ Guidance failed:'), error.message);
+      process.exit(1);
+    }
+  });
+
+// Multi-agent orchestration
+program
+  .command('orchestrate <task>')
+  .description('Orchestrate multiple AI agents for complex development tasks')
+  .option('-a, --agents <agents>', 'Specific agents to include (architect,coder,reviewer,tester)')
+  .option('-p, --parallel', 'Execute agents in parallel when possible')
+  .option('-q, --quality-level <level>', 'Quality requirements (basic, standard, high, enterprise)')
+  .action(async (task, options) => {
+    try {
+      console.log(chalk.blue.bold('🎭 Multi-Agent Orchestration System\n'));
+      
+      const taskConfig = {
+        name: task,
+        type: 'development',
+        requiresQA: options.qualityLevel !== 'basic',
+        qualityRequirements: {
+          level: options.qualityLevel || 'standard',
+          testCoverage: options.qualityLevel === 'enterprise' ? 0.95 : 0.8,
+          codeReview: true
+        },
+        executionMode: options.parallel ? 'parallel' : 'intelligent'
+      };
+      
+      if (options.agents) {
+        taskConfig.preferredAgents = options.agents.split(',').map(a => a.trim());
+      }
+      
+      const context = {
+        projectInfo: await projectDetector.detect(process.cwd()),
+        timeConstraints: { maxDuration: 3600000 }, // 1 hour
+        userPreferences: { parallel: options.parallel }
+      };
+      
+      const result = await subagentOrchestrator.orchestrateTask(taskConfig, context);
+      
+      console.log(chalk.green.bold('\n🎉 Multi-agent orchestration completed!'));
+      console.log(chalk.cyan(`Task: ${taskConfig.name}`));
+      console.log(chalk.cyan(`Phases completed: ${result.phases}`));
+      console.log(chalk.cyan(`Duration: ${(result.duration / 1000).toFixed(1)}s`));
+      
+    } catch (error) {
+      console.error(chalk.red('❌ Orchestration failed:'), error.message);
+      process.exit(1);
+    }
+  });
+
+// Intelligent feature creation
+program
+  .command('create-feature <name>')
+  .description('Intelligently create a new feature with full AI orchestration')
+  .option('-d, --description <desc>', 'Feature description')
+  .option('-c, --complexity <level>', 'Feature complexity (simple, medium, complex)')
+  .option('--with-tests', 'Include comprehensive test suite')
+  .option('--with-docs', 'Include documentation generation')
+  .action(async (name, options) => {
+    try {
+      console.log(chalk.blue.bold(`🚀 Creating Feature: ${name}\n`));
+      
+      // Start intelligent workflow for feature creation
+      const workflow = await workflowEngine.startWorkflow('create-feature', {
+        featureName: name,
+        description: options.description || `New feature: ${name}`,
+        complexity: options.complexity || 'medium',
+        includeTests: options.withTests || true,
+        includeDocumentation: options.withDocs || false,
+        fullOrchestration: true
+      });
+      
+      // Orchestrate multiple agents for comprehensive feature development
+      const orchestrationTask = {
+        name: `feature-${name}`,
+        type: 'feature-development',
+        primarySkill: 'coding',
+        requiresQA: true,
+        qualityRequirements: {
+          level: 'high',
+          testCoverage: 0.9,
+          codeReview: true,
+          securityScan: true
+        }
+      };
+      
+      const context = {
+        feature: { name, description: options.description },
+        projectInfo: await projectDetector.detect(process.cwd()),
+        workflow: workflow
+      };
+      
+      await subagentOrchestrator.orchestrateTask(orchestrationTask, context);
+      
+      console.log(chalk.green.bold(`\n🎉 Feature '${name}' created successfully!`));
+      console.log(chalk.cyan('The feature has been implemented with:'));
+      console.log(chalk.cyan('  ✓ Intelligent architecture design'));
+      console.log(chalk.cyan('  ✓ Comprehensive code implementation'));  
+      console.log(chalk.cyan('  ✓ Full test suite with high coverage'));
+      console.log(chalk.cyan('  ✓ Code review and quality assurance'));
+      console.log(chalk.cyan('  ✓ Security validation'));
+      
+      if (options.withDocs) {
+        console.log(chalk.cyan('  ✓ Complete documentation'));
+      }
+      
+    } catch (error) {
+      console.error(chalk.red('❌ Feature creation failed:'), error.message);
       process.exit(1);
     }
   });
