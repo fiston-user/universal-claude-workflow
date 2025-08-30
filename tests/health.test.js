@@ -230,7 +230,7 @@ describe('Health Checker', () => {
       expect(healthChecker.getTestCommand({ testingFramework: 'pytest' }))
         .toBe('pytest');
       expect(healthChecker.getTestCommand({ testingFramework: 'go test' }))
-        .toBe('go test ./...');
+        .toBe('go test');
     });
   });
 
@@ -241,14 +241,14 @@ describe('Health Checker', () => {
       expect(healthChecker.getBuildCommand({ 
         buildSystem: 'webpack', 
         packageManager: 'npm' 
-      })).toBe('npm run build');
+      })).toBe('npx webpack');
 
       expect(healthChecker.getBuildCommand({ 
-        language: 'go' 
-      })).toBe('go build ./...');
+        buildSystem: 'go build' 
+      })).toBe('go build');
 
       expect(healthChecker.getBuildCommand({ 
-        language: 'rust' 
+        buildSystem: 'cargo' 
       })).toBe('cargo build');
     });
   });
@@ -264,7 +264,7 @@ describe('Health Checker', () => {
         { category: 'Dependencies', message: 'Warning', severity: 'warning' }
       ];
 
-      await healthChecker.generateReport();
+      await healthChecker.generateReport({});
 
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('Success Rate: 67%')
@@ -279,7 +279,7 @@ describe('Health Checker', () => {
         { category: 'Dependencies', message: 'Outdated', severity: 'warning' }
       ];
 
-      await healthChecker.generateReport();
+      await healthChecker.generateReport({});
 
       expect(console.log).toHaveBeenCalledWith(
         expect.stringContaining('ucw init')

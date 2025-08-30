@@ -12,6 +12,8 @@ describe('ProjectDetector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const glob = require('glob');
+    glob.sync = jest.fn().mockReturnValue([]);
   });
 
   describe('detect', () => {
@@ -45,6 +47,8 @@ describe('ProjectDetector', () => {
       });
 
       fs.readFile = jest.fn().mockResolvedValue('');
+      const glob = require('glob');
+      glob.sync = jest.fn().mockReturnValue([]);
 
       const result = await projectDetector.detect(mockProjectRoot);
 
@@ -82,6 +86,8 @@ describe('ProjectDetector', () => {
         return Promise.resolve({});
       });
 
+      const glob = require('glob');
+      glob.sync = jest.fn().mockReturnValue([]);
       const result = await projectDetector.detect(mockProjectRoot);
 
       expect(result).toEqual(expect.objectContaining({
@@ -103,7 +109,7 @@ describe('ProjectDetector', () => {
 
       fs.readFile = jest.fn().mockImplementation((filePath) => {
         if (filePath.endsWith('requirements.txt')) {
-          return Promise.resolve('Django==4.1.0\npytest==7.2.0\npsycopg2==2.9.0');
+          return Promise.resolve('django==4.1.0\npytest==7.2.0\npsycopg2==2.9.0');
         }
         return Promise.resolve('');
       });
