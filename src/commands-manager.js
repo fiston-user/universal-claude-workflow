@@ -32,54 +32,226 @@ class CommandsManager {
         return this.getSecurityAuditCommand(config);
       case 'generate-docs':
         return this.getGenerateDocsCommand(config);
+      case 'new-feature':
+        return this.getNewFeatureCommand(config);
+      case 'resume-feature':
+        return this.getResumeFeatureCommand(config);
       default:
         console.warn(`Unknown command: ${commandName}`);
         return null;
     }
   }
 
+  getNewFeatureCommand(config) {
+    const projectType = config.framework || config.language || 'project';
+    const testCommand = this.getTestCommand(config);
+    const lintCommand = this.getLintCommand(config);
+
+    return `# 🚀 New Feature Orchestrator
+
+Run an end-to-end, multi-agent feature workflow with planning, research, Agent‑OS style tasks, gated execution, and persistent context logging for ${projectType}.
+
+Usage:
+/new-feature "<short feature name>" — optional description in $ARGUMENTS
+
+Goals:
+- Gather rich project context and external references
+- Plan implementation as small, verifiable subtasks
+- Confirm plan with the user before any code edits
+- Track progress in persistent .ucw files with checklists
+- Produce artifacts so future sessions can resume with full context
+
+Core Phases:
+1) Context Agent — Project context collection
+2) Research Agent — Web/doc search for up-to-date info
+3) Planner Agent — Plan + tasks spec with acceptance criteria
+4) Executor/Tracker — Gated execution with checklists and logs
+
+Required/Optional Tools:
+- MCP: filesystem (required), git (recommended)
+- MCP: web/browser/search (optional). If configured, use it for official docs, RFCs, changelogs.
+
+File Conventions (create if missing):
+- .ucw/features/index.json — catalog of features and statuses
+- .ucw/features/<slug>/plan.md — high‑level plan (checkboxes)
+- .ucw/features/<slug>/tasks.md — numbered parent tasks with decimal subtasks (Agent‑OS style)
+- .ucw/features/<slug>/research.md — links and research notes
+- .ucw/features/<slug>/context.md — project context summary for this feature
+- .ucw/features/<slug>/mission-lite.md — 1–3 sentence mission for compact context
+- .ucw/sessions/<slug>-<ISO>.md — per‑session activity log
+
+Slug Rules:
+- slug = lowercased feature name with dashes. Example: "Add OAuth Login" → add-oauth-login
+
+Step-by-Step Protocol
+
+Phase 0 — Intake
+1. Ask the user to provide/confirm: name, goal, scope, constraints, success criteria. Do not modify code.
+2. Generate slug and feature directory: .ucw/features/<slug>/
+3. Initialize index entry in .ucw/features/index.json with status: planning
+
+Phase 1 — Context Agent
+1. Summarize local project context: framework, language, testing, build, key entry points, relevant modules. Prefer reading: README.md, CLAUDE.md, package.json, src/**. Keep concise.
+2. Create mission-lite: .ucw/features/<slug>/mission-lite.md with a short pitch (problem, users, value).
+3. Write .ucw/features/<slug>/context.md with the summary and links to files.
+
+Phase 2 — Research Agent (web/doc search)
+1. If an MCP web/search/browser server is available, search for up-to-date official docs, breaking changes, best practices, and security notes relevant to the feature.
+2. Capture links and snippets with citations in .ucw/features/<slug>/research.md.
+3. If no web server is configured, ask the user to provide links or skip with a note.
+
+Phase 3 — Planner Agent
+1. Propose a high-level plan in .ucw/features/<slug>/plan.md with:
+   - Title and feature description
+   - Assumptions and non-goals
+   - Checklists grouped by phases: design, implementation, tests, docs, rollout
+   - For each task: owner (optional), acceptance criteria, estimated impact
+   - Validation commands: lint (\`${lintCommand}\`), tests (\`${testCommand}\`), build
+2. Present the plan to the user and request explicit confirmation to proceed. Do not edit source files until confirmed.
+
+Phase 3.1 — Tasks Spec (Agent‑OS style)
+1. Create .ucw/features/<slug>/tasks.md using this structure:
+   - Parent tasks: 1–5 items, each a top‑level checklist (e.g., "- [ ] 1. Implement OAuth login")
+   - Subtasks: up to ~8 per parent task using decimal notation (1.1, 1.2, ...)
+   - First subtask is typically “Write tests for [component/feature]”
+   - Final subtask is “Verify all tests pass”
+2. Ask for review/approval of tasks.md before execution.
+
+Phase 4 — Executor/Tracker (Gated)
+1. For each parent task in tasks.md:
+   - Confirm with user to proceed on this parent task.
+   - Execute subtasks in order (tests first, implementation, verification last).
+   - Run focused tests for this parent task during the loop; mark subtasks as [x].
+   - Update plan.md if applicable; keep notes concise.
+   - Append a brief log entry to .ucw/sessions/<slug>-<ISO>.md.
+2. After completing assigned parent tasks, run full-suite validations (lint/tests/build) as a post‑flight step.
+3. Pause after each parent task and ask whether to continue to the next one.
+
+Phase 5 — Wrap-up
+1. Update .ucw/features/index.json: status completed or in‑progress with lastUpdated timestamp.
+2. Add a "Where to resume" section to plan.md indicating next steps.
+3. Optionally add a link to this feature in CLAUDE.md under a "Feature Work Index" section.
+
+Quality Gates
+- Keep diffs small and focused; prefer separate commits per subtask.
+- Ensure tests exist for meaningful behavior; avoid testing implementation details.
+- Do not introduce breaking changes without user sign-off.
+
+MCP/Web Research Guidelines
+- Prioritize official docs, RFCs, vendor blogs; capture URLs and short annotations.
+- Note any version-specific caveats that apply to this project.
+
+Resumption Protocol (next session)
+1. Read .ucw/features/index.json for in‑progress features.
+2. Prefer resuming from .ucw/features/<slug>/tasks.md: select the first parent task with an unchecked item, else fall back to plan.md.
+3. Review mission-lite.md, context.md, and research.md to refresh memory.
+4. Continue the gated Executor/Tracker loop.
+
+Example
+\`\`\`bash
+/new-feature "Add OAuth login with PKCE"
+\`\`\`
+Then follow the protocol above, producing the .ucw feature folder and gated execution.
+`;
+  }
+
+  getResumeFeatureCommand(config) {
+    return `# 🔁 Resume Feature
+
+Quickly resume in-progress feature work by reloading context and continuing from the next unchecked task.
+
+Usage
+- \`/resume-feature\` — Resume the most recent in-progress feature
+- \`/resume-feature <slug>\` — Resume a specific feature by slug
+
+Where UCW stores state
+- \`.ucw/features/index.json\` — Feature catalog with status and timestamps
+- \`.ucw/features/<slug>/plan.md\` — High‑level plan checklist
+- \`.ucw/features/<slug>/tasks.md\` — Numbered parent tasks with decimal subtasks
+- \`.ucw/features/<slug>/context.md\` — Local project context summary
+- \`.ucw/features/<slug>/research.md\` — Links + citations for reference
+- \`.ucw/sessions/<slug>-<ISO>.md\` — Append-only session log
+
+Resume Protocol
+1) Identify target feature:
+   - If an argument is provided, use it as the slug.
+   - Else, read index.json for status=\"in-progress\" and pick the most recently updated.
+   - If index.json is missing, scan \`.ucw/features/*\` for the latest folder with a \`plan.md\`.
+2) Load context:
+   - Prefer \`tasks.md\`: find the first parent with an unchecked item; then its next unchecked subtask if present.
+   - Else, fall back to \`plan.md\` and find the first unchecked checklist item.
+   - Read \`mission-lite.md\` (if present), \`context.md\`, and \`research.md\` to refresh.
+3) Confirm next step:
+   - Propose the next unchecked task with acceptance criteria and ask for confirmation before edits.
+4) Execute with gates:
+   - Implement minimal changes to satisfy the task; run lint/tests/build; mark task as done; append session log; ask to continue.
+
+Tips
+- If multiple features are in progress, the command should list them and ask which to resume.
+- If no features found, instruct how to start with \`/new-feature\`.
+ - Keep context compact by quoting only relevant snippets from standards/docs.
+
+This command assumes the filesystem MCP is available so Claude can read \`.ucw/*\` files during the session.`;
+  }
+
   getTddCycleCommand(config) {
     const testCommand = this.getTestCommand(config);
+    const projectType = config.framework || config.language || 'generic';
     
-    return `# TDD Cycle Command
+    return `# 🧪 TDD Cycle Command - Enhanced for ${projectType}
 
-Execute a complete Test-Driven Development cycle:
+Execute a complete Test-Driven Development cycle with intelligent Claude Code assistance:
 
-1. **RED PHASE**: Write a failing test
-   - Create a test for the functionality described in $ARGUMENTS
-   - Ensure the test fails initially
-   - Focus on the expected behavior and interface
+## 🔴 RED PHASE: Write a failing test
+1. **Analyze Requirements**: Break down the feature described in $ARGUMENTS
+2. **Design Test Cases**: Consider edge cases and expected behaviors
+3. **Write Failing Test**: Create a test that captures the intended functionality
+   - Use descriptive test names that explain behavior
+   - Follow ${this.getTestingConventions(config)} conventions
+   - Ensure the test fails for the right reason
 
-2. **GREEN PHASE**: Make the test pass
-   - Write minimal code to make the test pass
-   - Don't worry about perfect code - just make it work
-   - Run tests to ensure they pass
+## 🟢 GREEN PHASE: Make it pass with minimal code
+1. **Implement Minimally**: Write just enough code to make the test pass
+2. **Avoid Over-Engineering**: Don't add features not covered by tests
+3. **Focus on Functionality**: Make it work, don't make it perfect yet
 
-3. **REFACTOR PHASE**: Improve the code
-   - Clean up the implementation
-   - Remove duplication
-   - Improve readability and structure
-   - Ensure all tests still pass
+## 🔵 REFACTOR PHASE: Improve while keeping tests green
+1. **Clean Up Code**: Improve readability and structure
+2. **Remove Duplication**: Apply DRY principles
+3. **Optimize Performance**: Only if needed and measurable
+4. **Update Documentation**: Keep inline comments current
 
-## Usage
-\`/tdd-cycle Add user authentication to the login form\`
+## 💡 Usage Examples
+\`\`\`bash
+# Basic feature implementation
+/tdd-cycle "implement user login validation"
 
-## Test Command
-Run tests using: \`${testCommand}\`
+# API endpoint development  
+/tdd-cycle "create POST /api/users endpoint with validation"
 
-## Process
-- Start by writing the test first
-- Make the test fail (RED)
-- Write minimal code to pass (GREEN)  
-- Refactor while keeping tests green
-- Commit after each successful cycle
+# Complex business logic
+/tdd-cycle "calculate shipping costs based on weight and distance"
+\`\`\`
 
-## Guidelines
-- Keep tests simple and focused
-- Write only enough code to pass the test
-- Refactor fearlessly with test coverage
-- One functionality per TDD cycle
-`;
+## 🛠 Project-Specific Configuration
+- **Test Runner**: \`${testCommand}\`
+- **Test Framework**: ${config.testingFramework || 'Not configured - recommend Jest/Vitest'}
+- **Coverage Target**: 80%+ for new code
+- **Test Location**: ${this.getTestPath(config)}
+
+## 🎯 Quality Gates
+Before moving to next phase, ensure:
+- ✅ Test is meaningful and tests behavior, not implementation
+- ✅ Test fails for the expected reason (RED)
+- ✅ Implementation makes test pass without breaking others (GREEN)  
+- ✅ Code is clean, readable, and follows project conventions (REFACTOR)
+
+## 🔄 Automation Integration
+- **Pre-commit Hook**: Runs tests automatically
+- **CI/CD Pipeline**: Validates TDD cycle in pull requests
+- **Coverage Reporting**: Tracks test coverage improvements
+
+*Enhanced TDD workflow powered by Universal Claude Workflow*`;
   }
 
   getBddScenarioCommand(config) {
@@ -501,6 +673,32 @@ docs/
       default:
         return 'echo "No test command configured"';
     }
+  }
+
+  getTestingConventions(config) {
+    const conventions = {
+      'jest': 'Jest naming conventions (describe/it blocks)',
+      'vitest': 'Vitest testing patterns with describe/test',
+      'pytest': 'pytest naming (test_* functions)',
+      'go test': 'Go testing conventions (Test* functions)',
+      'cargo test': 'Rust testing with #[test] attribute',
+      'phpunit': 'PHPUnit testing conventions'
+    };
+
+    return conventions[config.testingFramework] || 'standard testing conventions';
+  }
+
+  getTestPath(config) {
+    const testPaths = {
+      'jest': 'src/__tests__/ or *.test.js files',
+      'vitest': 'src/**/*.{test,spec}.{js,ts}',
+      'pytest': 'tests/ directory or test_*.py files',
+      'go test': '*_test.go files alongside source',
+      'cargo test': 'src/lib.rs or tests/ directory',
+      'phpunit': 'tests/ directory'
+    };
+
+    return testPaths[config.testingFramework] || 'tests/ directory';
   }
 
   getLintCommand(config) {

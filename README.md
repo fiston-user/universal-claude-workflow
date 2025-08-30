@@ -39,6 +39,7 @@ npx ucw@latest
 - Test execution triggers
 - Build validation
 - Security scanning
+- Session resume primer (updates CLAUDE.md with a resume hint on session start)
 
 ### Sub-Agents
 - **Code Reviewer** - Automated code review and feedback
@@ -48,11 +49,8 @@ npx ucw@latest
 - **Security** - Vulnerability assessment and fixes
 
 ### Custom Commands
-- `/tdd-cycle` - Red-green-refactor automation
-- `/bdd-scenario` - Generate BDD scenarios
-- `/project-health` - System diagnostics
-- `/optimize-bundle` - Bundle analysis
-- `/security-audit` - Vulnerability scanning
+- `/new-feature` - Multi-agent feature planning + execution
+- `/resume-feature` - Resume in-progress feature from the next task
 
 ## Project Detection
 

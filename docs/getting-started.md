@@ -136,14 +136,10 @@ Smart automation that runs at key moments:
 - **Session Analytics** - Development session tracking
 
 ### 💻 Custom Commands
-Powerful slash commands for development workflows:
+Core slash commands for workflow continuity:
 
-- `/tdd-cycle` - Red-green-refactor TDD automation
-- `/bdd-scenario` - Generate behavior-driven scenarios
-- `/project-health` - Comprehensive diagnostics
-- `/optimize-bundle` - Bundle analysis and optimization
-- `/security-audit` - Security vulnerability scanning
-- `/generate-docs` - Documentation generation
+- `/new-feature` - Multi-agent feature planning + gated execution
+- `/resume-feature` - Resume in-progress feature from the next task
 
 ### 🔌 MCP Integrations
 Connect Claude Code to external services:

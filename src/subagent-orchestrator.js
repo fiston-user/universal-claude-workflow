@@ -409,9 +409,18 @@ class SubagentOrchestrator extends EventEmitter {
 
     this.agentHistory.push(insights);
 
-    // Save insights for future learning
-    const insightsFile = path.join(this.projectRoot, '.ucw', 'orchestration-insights.json');
-    await fs.writeJSON(insightsFile, this.agentHistory, { spaces: 2 });
+    try {
+      // Ensure .ucw directory exists
+      const ucwDir = path.join(this.projectRoot, '.ucw');
+      await fs.ensureDir(ucwDir);
+      
+      // Save insights for future learning
+      const insightsFile = path.join(ucwDir, 'orchestration-insights.json');
+      await fs.writeJSON(insightsFile, this.agentHistory, { spaces: 2 });
+    } catch (error) {
+      // Silently fail for insights recording - don't break the main flow
+      console.debug('Failed to record orchestration insights:', error.message);
+    }
   }
 
   // Placeholder methods for complex implementations

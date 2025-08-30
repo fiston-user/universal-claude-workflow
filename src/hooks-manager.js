@@ -48,6 +48,8 @@ class HooksManager {
         return this.getSecurityScanHook(config);
       case 'session-analytics':
         return this.getSessionAnalyticsHook(config);
+      case 'resume-primer':
+        return this.getResumePrimerHook(config);
       default:
         console.warn(chalk.yellow(`Unknown hook: ${hookName}`));
         return null;
@@ -231,6 +233,24 @@ class HooksManager {
     };
   }
 
+  getResumePrimerHook(config) {
+    // On session start, generate/update a concise resume hint in CLAUDE.md
+    // Uses a small Node script we ship in scripts/ucw-resume-primer.js
+    return {
+      'SessionStart': [
+        {
+          matcher: '*',
+          hooks: [
+            {
+              type: 'command',
+              command: 'node scripts/ucw-resume-primer.js || true'
+            }
+          ]
+        }
+      ]
+    };
+  }
+
   getTestCommand(config) {
     switch (config.testingFramework) {
       case 'jest':
@@ -304,6 +324,12 @@ class HooksManager {
         description: 'Track and analyze coding sessions',
         events: ['SessionStart', 'SessionEnd'],
         commands: ['log', 'analytics']
+      },
+      {
+        name: 'resume-primer',
+        description: 'Suggests where to resume and updates CLAUDE.md',
+        events: ['SessionStart'],
+        commands: ['update-claude', 'summarize']
       }
     ];
   }

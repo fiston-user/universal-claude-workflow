@@ -42,8 +42,8 @@ class Installer {
 
     // Detect project
     this.spinner = ora('Detecting project structure...').start();
-    const projectInfo = await projectDetector.detect(this.projectRoot);
-    this.spinner.succeed(`Detected ${projectInfo.type} project`);
+    const projectInfo = (await projectDetector.detect(this.projectRoot)) || {};
+    this.spinner.succeed(`Detected ${projectInfo.type || 'unknown'} project`);
 
     // Apply options and project detection
     const config = this.mergeConfiguration(options, projectInfo);
@@ -93,25 +93,22 @@ class Installer {
         name: 'hooks',
         message: 'Which automation hooks would you like?',
         choices: [
-          { name: 'Pre-commit validation', value: 'pre-commit', checked: true },
-          { name: 'Post-tool formatting', value: 'post-tool', checked: true },
-          { name: 'Test execution triggers', value: 'test-trigger' },
-          { name: 'Build validation', value: 'build-validation' },
-          { name: 'Security scanning', value: 'security-scan' },
-          { name: 'Session analytics', value: 'session-analytics', checked: true }
-        ]
-      },
+      { name: 'Pre-commit validation', value: 'pre-commit', checked: true },
+      { name: 'Post-tool formatting', value: 'post-tool', checked: true },
+      { name: 'Test execution triggers', value: 'test-trigger' },
+      { name: 'Build validation', value: 'build-validation' },
+      { name: 'Security scanning', value: 'security-scan' },
+      { name: 'Session analytics', value: 'session-analytics', checked: true },
+      { name: 'Session resume primer (adds resume hints to CLAUDE.md on start)', value: 'resume-primer' }
+      ]
+    },
       {
         type: 'checkbox',
         name: 'commands',
         message: 'Which custom commands would you like?',
         choices: [
-          { name: '/tdd-cycle - Red-green-refactor automation', value: 'tdd-cycle', checked: true },
-          { name: '/bdd-scenario - Generate BDD scenarios', value: 'bdd-scenario' },
-          { name: '/project-health - System diagnostics', value: 'project-health', checked: true },
-          { name: '/optimize-bundle - Bundle analysis', value: 'optimize-bundle' },
-          { name: '/security-audit - Security scanning', value: 'security-audit' },
-          { name: '/generate-docs - Documentation generation', value: 'generate-docs' }
+          { name: '/new-feature - Multi-agent feature workflow', value: 'new-feature', checked: true },
+          { name: '/resume-feature - Resume in-progress feature', value: 'resume-feature', checked: true }
         ]
       },
       {
@@ -137,7 +134,7 @@ class Installer {
       focus: options.focus || 'general',
       agents: options.agents || ['code-reviewer', 'test-generator'],
       hooks: options.hooks || ['pre-commit', 'post-tool', 'session-analytics'],
-      commands: options.commands || ['tdd-cycle', 'project-health'],
+      commands: options.commands || ['new-feature', 'resume-feature'],
       mcpIntegrations: options.mcpIntegrations || false,
       skipPermissions: options.skipPermissions || false
     };
@@ -207,12 +204,12 @@ class Installer {
   }
 
   async listTemplates(options = {}) {
-    const templates = await templateEngine.listAvailableTemplates();
+    const templates = (await templateEngine.listAvailableTemplates()) || [];
     
     console.log(chalk.blue.bold('📋 Available Templates\n'));
     
     const filteredTemplates = options.framework 
-      ? templates.filter(t => t.framework === options.framework)
+      ? templates.filter ? templates.filter(t => t.framework === options.framework) : []
       : templates;
 
     if (filteredTemplates.length === 0) {

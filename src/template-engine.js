@@ -276,6 +276,114 @@ Feature: User Authentication
 `;
   }
 
+  // Enhanced template generation methods for better Claude Code context
+  
+  getFocusDescription(focus) {
+    const descriptions = {
+      'tdd': '🧪 **Test-Driven Development** - Write tests first, then implement features using Red-Green-Refactor cycle.',
+      'bdd': '📋 **Behavior-Driven Development** - Focus on user behavior and acceptance criteria with Gherkin scenarios.',
+      'security': '🔒 **Security-First Development** - Prioritize security considerations in all development phases.',
+      'performance': '⚡ **Performance Optimization** - Focus on speed, efficiency, and resource optimization.',
+      'documentation': '📚 **Documentation & Maintenance** - Emphasis on clear documentation and maintainable code.',
+      'general': '🛠 **General Development** - Balanced approach covering all aspects of software development.'
+    };
+    return descriptions[focus] || descriptions['general'];
+  }
+
+  generateProjectStructure(config) {
+    const projectName = require('path').basename(config.projectRoot || process.cwd());
+    const structures = {
+      'react': `${projectName}/\n├── src/\n│   ├── components/\n│   ├── pages/\n│   ├── hooks/\n│   └── utils/\n├── public/\n├── tests/\n└── package.json`,
+      'nextjs': `${projectName}/\n├── app/\n│   ├── api/\n│   ├── components/\n│   └── (routes)/\n├── public/\n├── tests/\n└── package.json`,
+      'node': `${projectName}/\n├── src/\n│   ├── routes/\n│   ├── middleware/\n│   ├── controllers/\n│   └── models/\n├── tests/\n├── config/\n└── package.json`,
+      'python': `${projectName}/\n├── src/\n│   ├── api/\n│   ├── models/\n│   └── utils/\n├── tests/\n├── requirements.txt\n└── main.py`
+    };
+    
+    return structures[config.framework] || `${projectName}/\n├── src/\n├── tests/\n├── docs/\n└── package.json`;
+  }
+
+  getTestCommand(config) {
+    const testCommands = {
+      'jest': 'npm test',
+      'vitest': 'npm run test',
+      'pytest': 'pytest',
+      'go': 'go test ./...',
+      'rust': 'cargo test'
+    };
+    
+    return testCommands[config.testingFramework] || 'npm test';
+  }
+
+  getDevCommand(config) {
+    const devCommands = {
+      'nextjs': 'npm run dev',
+      'react': 'npm start',
+      'node': 'npm run dev',
+      'express': 'npm run dev',
+      'fastapi': 'uvicorn main:app --reload',
+      'django': 'python manage.py runserver'
+    };
+    
+    return devCommands[config.framework] || 'npm run dev';
+  }
+
+  getBuildCommand(config) {
+    const buildCommands = {
+      'nextjs': 'npm run build',
+      'react': 'npm run build',
+      'node': 'npm run build',
+      'go': 'go build',
+      'rust': 'cargo build --release',
+      'python': 'python setup.py build'
+    };
+    
+    return buildCommands[config.framework] || 'npm run build';
+  }
+
+  assessComplexity(config) {
+    let score = 0;
+    
+    // Framework complexity
+    const complexFrameworks = ['nextjs', 'angular', 'django'];
+    if (complexFrameworks.includes(config.framework)) score += 2;
+    
+    // Language complexity  
+    const complexLanguages = ['typescript', 'rust', 'go'];
+    if (complexLanguages.includes(config.language)) score += 1;
+    
+    // Testing setup
+    if (config.testingFramework) score += 1;
+    
+    // Build system
+    if (config.buildSystem && config.buildSystem !== 'standard') score += 1;
+    
+    if (score <= 2) return '🟢 **Simple** - Straightforward architecture';
+    if (score <= 4) return '🟡 **Medium** - Moderate complexity with multiple components';
+    return '🔴 **Complex** - Advanced architecture requiring careful coordination';
+  }
+
+  getPerformanceGuidelines(config) {
+    const guidelines = {
+      'react': '- Use React.memo for expensive components\n- Implement code splitting with lazy loading\n- Optimize bundle size with tree shaking',
+      'nextjs': '- Leverage Next.js automatic code splitting\n- Use Image component for optimized images\n- Implement ISR for dynamic content',
+      'node': '- Use async/await for I/O operations\n- Implement proper caching strategies\n- Monitor memory usage and garbage collection',
+      'python': '- Use asyncio for concurrent operations\n- Profile code with cProfile\n- Implement database connection pooling'
+    };
+    
+    return guidelines[config.framework] || '- Profile critical paths regularly\n- Optimize database queries\n- Implement caching where appropriate';
+  }
+
+  getSecurityGuidelines(config) {
+    const guidelines = {
+      'react': '- Sanitize user inputs to prevent XSS\n- Use HTTPS for all API communication\n- Validate data on both client and server',
+      'nextjs': '- Implement proper CSP headers\n- Use environment variables for secrets\n- Enable security headers in next.config.js',
+      'node': '- Use helmet.js for security headers\n- Implement rate limiting\n- Validate all inputs with joi or similar',
+      'python': '- Use parameterized queries for database\n- Implement proper authentication/authorization\n- Keep dependencies updated'
+    };
+    
+    return guidelines[config.framework] || '- Keep dependencies updated\n- Validate all inputs\n- Use HTTPS in production\n- Implement proper authentication';
+  }
+
   async listAvailableTemplates() {
     return [
       {
