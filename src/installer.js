@@ -55,7 +55,7 @@ class Installer {
     console.log(chalk.cyan('\nNext steps:'));
     console.log(chalk.cyan('  1. Review the generated CLAUDE.md file'));
     console.log(chalk.cyan('  2. Run "claude" in your project directory'));
-    console.log(chalk.cyan('  3. Try "/tdd-cycle" or "/project-health" commands'));
+    console.log(chalk.cyan('  3. Try "/new-feature" or "/resume-feature" commands'));
     console.log(chalk.cyan('  4. Check workflow health with "ucw health"'));
   }
 
@@ -99,7 +99,7 @@ class Installer {
       { name: 'Build validation', value: 'build-validation' },
       { name: 'Security scanning', value: 'security-scan' },
       { name: 'Session analytics', value: 'session-analytics', checked: true },
-      { name: 'Session resume primer (adds resume hints to CLAUDE.md on start)', value: 'resume-primer' }
+      { name: 'Session resume primer (adds resume hints to CLAUDE.md on start)', value: 'resume-primer', checked: true }
       ]
     },
       {
@@ -133,7 +133,7 @@ class Installer {
       buildSystem: projectInfo.buildSystem,
       focus: options.focus || 'general',
       agents: options.agents || ['code-reviewer', 'test-generator'],
-      hooks: options.hooks || ['pre-commit', 'post-tool', 'session-analytics'],
+      hooks: options.hooks || ['pre-commit', 'post-tool', 'session-analytics', 'resume-primer'],
       commands: options.commands || ['new-feature', 'resume-feature'],
       mcpIntegrations: options.mcpIntegrations || false,
       skipPermissions: options.skipPermissions || false

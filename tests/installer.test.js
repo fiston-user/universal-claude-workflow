@@ -154,7 +154,7 @@ describe('Installer', () => {
         buildSystem: undefined,
         focus: 'security',
         agents: ['code-reviewer', 'test-generator'],
-        hooks: ['pre-commit', 'post-tool', 'session-analytics'],
+        hooks: ['pre-commit', 'post-tool', 'session-analytics', 'resume-primer'],
         commands: ['new-feature', 'resume-feature'],
         mcpIntegrations: false,
         skipPermissions: false
